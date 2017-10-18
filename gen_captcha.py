@@ -1,9 +1,17 @@
 #coding:utf-8
-from captcha.image import ImageCaptcha  # pip install captcha
+  
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import random,time,os
+import random,time,os,platform
+
+sysstr = platform.system()
+if(sysstr =="Windows"):
+    import captcha.Capthca
+else:
+    from captcha.image import ImageCaptcha # pip install captcha
+
+
 
 # 验证码中的字符, 就不用汉字了
 number = ['0','1','2','3','4','5','6','7','8','9']
@@ -19,11 +27,11 @@ def random_captcha_text(char_set=number+alphabet+ALPHABET, captcha_size=4):
 
 # 生成字符对应的验证码
 def gen_captcha_text_and_image():
-	image = ImageCaptcha()
-
+	
 	captcha_text = random_captcha_text()
 	captcha_text = ''.join(captcha_text)
 
+   image = ImageCaptcha()
 	captcha = image.generate(captcha_text)
 	#image.write(captcha_text, captcha_text + '.jpg')  # 写到文件
 
@@ -40,7 +48,7 @@ if __name__ == '__main__':
 	# 测试
     while(1):
     	text, image = gen_captcha_text_and_image()
-    	print 'begin ',time.ctime(),type(image)
+    	print('begin '+time.ctime()+type(image))
     	f = plt.figure()
     	ax = f.add_subplot(111)
     	ax.text(0.1, 0.9,text, ha='center', va='center', transform=ax.transAxes)
@@ -48,4 +56,4 @@ if __name__ == '__main__':
 
 
     	plt.show()
-    	print 'end ',time.ctime()
+    	print('end '+time.ctime())
