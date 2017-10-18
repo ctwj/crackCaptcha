@@ -19,7 +19,7 @@ DerivedData
 venv/
 *.pyc
 .idea/
-model/crack_capcha.model-8800.data-00000-of-00001
+model/
 
 # CocoaPods
 #
