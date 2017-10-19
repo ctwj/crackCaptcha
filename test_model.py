@@ -1,11 +1,10 @@
 #coding:utf-8
-from gen_captcha import gen_captcha_text_and_image
-from gen_captcha import number
-from gen_captcha import alphabet
-from gen_captcha import ALPHABET
+from captcha3 import gen_captcha_text_and_image
+from captcha3 import number
+from captcha3 import alphabet
+from captcha3 import ALPHABET
 
 import matplotlib.pyplot as plt
-from PIL import Image
 
 import numpy as np
 import tensorflow as tf
@@ -142,7 +141,6 @@ def crack_captcha_cnn(w_alpha=0.01, b_alpha=0.1):
 
 def crack_captcha(captcha_image):
 	output = crack_captcha_cnn()
-
 	saver = tf.train.Saver()
 	with tf.Session() as sess:
 		saver.restore(sess, tf.train.latest_checkpoint('./model'))
@@ -159,15 +157,33 @@ def crack_captcha(captcha_image):
 		return vec2text(vector)
 
 if __name__ == '__main__':
-
-	text, image = gen_captcha_text_and_image()
-	f = plt.figure()
-	ax = f.add_subplot(111)
-	ax.text(0.1, 0.9,text, ha="center", va="center", transform=ax.transAxes)
-	plt.imshow(image)
-	plt.show()
-	image = convert2gray(image) #生成一张新图
-	image = image.flatten() / 255 # 将图片一维化
-	predict_text = crack_captcha(image) #导入模型识别
-	print("正确: {}  预测: {}".format(text, predict_text))
+	output = crack_captcha_cnn()
+	saver = tf.train.Saver()
+	
+	times = 0
+	with tf.Session() as sess:
+		tf.reset_default_graph()	
+		saver.restore(sess, tf.train.latest_checkpoint('./model'))
+		while True:
+			texts, image = gen_captcha_text_and_image()
+			f = plt.figure()
+			ax = f.add_subplot(111)
+			ax.text(0.1, 0.9,text, ha="center", va="center", transform=ax.transAxes)
+			plt.imshow(image)
+			plt.show()
+			image = convert2gray(image) #生成一张新图
+			image = image.flatten() / 255 # 将图片一维化
+			predict = tf.argmax(tf.reshape(output, [-1, MAX_CAPTCHA, CHAR_SET_LEN]), 2)
+			text_list = sess.run(predict, feed_dict={X: [image], keep_prob: 1})
+			text = text_list[0].tolist()
+			vector = np.zeros(MAX_CAPTCHA*CHAR_SET_LEN)
+			i = 0
+			for n in text:
+				vector[i*CHAR_SET_LEN + n] = 1
+				i += 1
+			t_text = vec2text(vector) 
+			print("正确: {}  预测: {}".format(texts, t_text))
+			times += 1
+			if times>6:
+				break
 	#train_crack_captcha_cnn()
